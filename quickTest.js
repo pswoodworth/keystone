@@ -30,15 +30,23 @@ User.register();
 keystone.start({
   onStart: () => {
     // test your stuff here
-    User.model.findOne({isAdmin: true}).exec(function(err, user){
-      console.log(user);
-      console.log('_', user._);
-      if (err) {
-        throw err;
-      } else {
-        // all went well; quick the process so the port doesn't stay open
-        throw '~ OK. Shutting down. ~';
-      }
-    });
+    var query = User.model.find({email: /user/});
+    query.count((err, count)=>{
+        console.log('query.count()', count);
+      })
+      .limit(1)
+      .exec((err, users)=>{
+        console.log('# Users:', users.length);
+        var user = users[0];
+        user._.password.compare('admin', function(err, isMatch) {
+          console.log(isMatch ? 'Password matches' : 'Incorrect password');
+          if (err) {
+            throw err;
+          } else {
+            // all went well; quick the process so the port doesn't stay open
+            throw '~ OK. Shutting down. ~';
+          }
+        });
+      });
   },
 });
